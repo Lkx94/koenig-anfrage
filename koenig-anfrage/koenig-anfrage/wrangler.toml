@@ -1,0 +1,16 @@
+name = "koenig-anfrage"
+main = "src/index.js"
+compatibility_date = "2026-01-15"
+workers_dev = true
+
+# Keine Protokolle mit Formularinhalten (Datenschutz)
+[observability]
+enabled = false
+
+# Kurzzeitspeicher für Fotos (löscht sich nach 7 Tagen selbst).
+# Die ID bekommst du beim Anlegen des KV-Namespace in Cloudflare (Anleitung Schritt 3).
+[[kv_namespaces]]
+binding = "DATEIEN"
+id = "HIER_KV_ID_EINTRAGEN"
+
+# Der Resend-Schlüssel steht NICHT hier, sondern als Secret RESEND_API_KEY in Cloudflare (Anleitung Schritt 4).

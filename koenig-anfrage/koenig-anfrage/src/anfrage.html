@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Dachanfrage König</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: schmale Formularspalte, schwarzer Kopf wie ein Briefkopf, 5 Schritte als Dachlatten-Fortschritt */
+:root{
+  --bg:#f6f4f2; --surface:#ffffff; --ink:#1b1714; --muted:#6e655e; --line:#e2dcd6;
+  --orange:#e2681b; --orange-ink:#ffffff; --orange-soft:#fbe6d8; --head:#161210; --head-ink:#f4ede7;
+  --err:#b42318; --ok:#1f7a45;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",Helvetica,Arial,sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141110; --surface:#1e1a17; --ink:#efe8e2; --muted:#a59a91; --line:#352e29;
+  --orange:#f07a2c; --orange-ink:#1a0f07; --orange-soft:#3a2416; --head:#0b0908; --head-ink:#f4ede7;
+  --err:#ff8a7a; --ok:#6fd49a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141110; --surface:#1e1a17; --ink:#efe8e2; --muted:#a59a91; --line:#352e29;
+  --orange:#f07a2c; --orange-ink:#1a0f07; --orange-soft:#3a2416; --head:#0b0908; --head-ink:#f4ede7;
+  --err:#ff8a7a; --ok:#6fd49a; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+*{box-sizing:border-box}
+.band{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:720px;margin:0 auto}
+header.band{background:var(--head);color:var(--head-ink);padding-block:22px 26px}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.brand b{font-family:var(--f-display);font-weight:800;font-size:2.1rem;letter-spacing:.06em;color:var(--orange);line-height:1}
+.brand span{font-family:var(--f-display);font-weight:600;text-transform:uppercase;letter-spacing:.14em;font-size:.82rem;opacity:.8}
+header h1{font-family:var(--f-display);font-weight:700;font-size:clamp(1.8rem,5vw,2.5rem);line-height:1.05;margin:18px 0 8px;text-wrap:balance}
+header p{margin:0;max-width:60ch;opacity:.85}
+header p.scope{font-family:var(--f-display);font-weight:600;font-size:1.15rem;color:var(--orange);opacity:1;margin:-2px 0 12px}
+.meta{margin-top:12px;font-size:.9rem;opacity:.7}
+
+/* Fortschritt */
+.progress{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:22px 0 6px}
+.progress i{height:8px;border-radius:2px;background:var(--line);transition:background .25s}
+.progress i.on{background:var(--orange)}
+.steplabel{font-family:var(--f-display);font-weight:600;text-transform:uppercase;letter-spacing:.12em;font-size:.85rem;color:var(--muted)}
+
+main.band{padding-block:6px 48px}
+form{display:block}
+.step{display:flex;flex-direction:column;gap:22px}
+.step h2{font-family:var(--f-display);font-weight:700;font-size:1.7rem;margin:4px 0 0;line-height:1.1}
+.step>p.lead{margin:-12px 0 0;color:var(--muted)}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+.group{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:16px}
+.group h3{margin:0;font-size:1rem;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.c2{grid-column:span 2}.c3{grid-column:span 3}.c4{grid-column:span 4}.c6{grid-column:span 6}
+@media (max-width:560px){.c2,.c3,.c4{grid-column:span 6}.c2.keep{grid-column:span 2}.c4.keep{grid-column:span 4}}
+label.f{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:.95rem;min-width:0}
+.req::after{content:" *";color:var(--orange)}
+.hint{font-weight:400;color:var(--muted);font-size:.88rem}
+input[type=text],input[type=email],input[type=tel],input[type=number],select,textarea{
+  font:inherit;font-weight:400;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:11px 12px;width:100%;min-width:0}
+textarea{min-height:120px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,.chip input:focus-visible+span,.drop:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.invalid{border-color:var(--err)!important}
+.errmsg{color:var(--err);font-size:.88rem;font-weight:600}
+
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.chip span{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border:1px solid var(--line);border-radius:999px;background:var(--bg);cursor:pointer;font-weight:500;user-select:none}
+.chip input:checked+span{background:var(--orange);border-color:var(--orange);color:var(--orange-ink)}
+.chips.err .chip span{border-color:var(--err)}
+
+/* Karten-Auswahl (Dringlichkeit, Dachform) */
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.cards.roofs{grid-template-columns:repeat(3,1fr)}
+@media (max-width:480px){.cards.roofs{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:420px){.cards:not(.roofs){grid-template-columns:1fr}}
+.card{position:relative}
+.card input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.card .body{height:100%;display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);cursor:pointer}
+.card .body strong{font-weight:700}
+.card .body small{color:var(--muted)}
+.card input:checked+.body{border-color:var(--orange);box-shadow:inset 0 0 0 1px var(--orange);background:var(--orange-soft)}
+.card input:focus-visible+.body{outline:3px solid var(--orange);outline-offset:2px}
+.roofs .body{align-items:center;text-align:center;gap:6px}
+.roofs svg{width:64px;height:40px}
+.roofs svg path,.roofs svg rect{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linejoin:round}
+.roofs svg .fill{fill:var(--orange);stroke:none;opacity:.85}
+
+/* Maßtabelle */
+.tablewrap{overflow-x:auto}
+table.mass{width:100%;border-collapse:collapse;min-width:760px;font-variant-numeric:tabular-nums}
+table.mass select{padding:9px 8px}
+.bauteile{display:flex;flex-direction:column;gap:12px}
+.bauteil{border:1px solid var(--line);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:12px;background:var(--bg)}
+.bauteil .result{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;font-variant-numeric:tabular-nums;border-top:1px dashed var(--line);padding-top:10px}
+.bauteil .result b,.total b{font-weight:700}
+.acc{color:var(--orange)}
+.bauteil .result .why{color:var(--muted);font-weight:500}
+.bauteil .result .iconbtn{margin-left:auto}
+.total{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;font-variant-numeric:tabular-nums;padding:12px 14px;border-radius:8px;background:var(--orange-soft);font-weight:600}
+.total>span:first-child{margin-right:auto;font-family:var(--f-display);font-size:1.15rem;text-transform:uppercase;letter-spacing:.06em}
+.total b{font-size:1.15rem}
+table.mass td.qm.g{font-weight:500;color:var(--muted)}
+table.mass td.qm small{font-weight:500;color:var(--muted);font-size:.82rem}
+table.mass th{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;font-weight:600;padding:0 6px 6px}
+table.mass td{padding:4px 6px;vertical-align:middle}
+table.mass td.qm{text-align:right;font-weight:700;white-space:nowrap}
+table.mass input{padding:9px 10px}
+table.mass tfoot td{border-top:1px solid var(--line);padding-top:10px;font-weight:700}
+.iconbtn{background:none;border:1px solid var(--line);border-radius:8px;width:38px;height:38px;color:var(--muted);cursor:pointer;font-size:1.2rem;line-height:1}
+.iconbtn:hover{color:var(--err);border-color:var(--err)}
+.unit{position:relative}
+.unit input{padding-right:40px}
+.unit em{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-style:normal;color:var(--muted);font-size:.9rem;pointer-events:none}
+
+/* Fotos */
+.drop{border:2px dashed var(--line);border-radius:var(--r);padding:26px 16px;text-align:center;background:var(--bg);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px}
+.drop.over{border-color:var(--orange);background:var(--orange-soft)}
+.drop strong{font-size:1.05rem}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+.thumb{position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--bg);aspect-ratio:1;max-width:100%}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .doc{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:8px;text-align:center;font-size:.8rem;word-break:break-word;gap:4px}
+.thumb .doc b{font-family:var(--f-display);font-size:1.3rem;color:var(--orange)}
+.thumb button{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;cursor:pointer;font-size:1rem;line-height:1}
+.thumb .size{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);color:#fff;font-size:.72rem;padding:2px 6px;font-variant-numeric:tabular-nums}
+ul.tips{margin:0;padding-left:20px;color:var(--muted)}
+ul.tips li{margin:2px 0}
+
+/* Buttons */
+.nav{display:flex;justify-content:space-between;gap:12px;margin-top:6px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:700;border-radius:8px;padding:13px 22px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.primary{background:var(--orange);border-color:var(--orange);color:var(--orange-ink);margin-left:auto}
+.btn.link{background:none;border:0;color:var(--orange);padding:6px 0;font-weight:700;text-align:left}
+.btn:disabled{opacity:.6;cursor:wait}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:400}
+.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--orange);flex:none}
+
+.notice{border-left:4px solid var(--orange);background:var(--orange-soft);padding:12px 14px;border-radius:0 8px 8px 0;font-size:.95rem}
+.done{text-align:left;display:flex;flex-direction:column;gap:14px}
+.done h2{font-family:var(--f-display);font-size:2rem;margin:10px 0 0}
+pre.summary{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto;font-size:.85rem;white-space:pre-wrap;word-break:break-word}
+footer.band{padding-block:20px 30px;color:var(--muted);font-size:.88rem;border-top:1px solid var(--line)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:6px 22px}
+footer a{color:inherit}
+.hp{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<header class="band">
+  <div class="wrap">
+    <div class="brand"><b>KÖNIG</b><span>Dachdeckermeisterbetrieb · Koblenz</span></div>
+    <h1>Ihre Anfrage rund ums Dach</h1>
+    <p class="scope">Steildach, Flachdach, Reparatur, Dachfenster, Dachrinne, Solarthermie und mehr</p>
+    <p>Mit Ihren Angaben, ein paar Maßen und Fotos können wir Ihr Vorhaben vorab einschätzen und den Termin vor Ort gezielt vorbereiten. Das dauert etwa 5 Minuten. Pflichtfelder sind mit * markiert.</p>
+    <div class="progress" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+    <div class="steplabel" id="steplabel" aria-live="polite">Schritt 1 von 5 · Kontakt</div>
+  </div>
+</header>
+
+<main class="band">
+<div class="wrap">
+<form id="f" novalidate>
+
+<!-- Schritt 1 -->
+<section class="step" data-step="1" data-name="Kontakt">
+  <h2>Wer fragt an?</h2>
+  <fieldset class="group">
+    <h3 class="req">Anfrage als</h3>
+    <div class="chips" data-required="typ">
+      <label class="chip"><input type="radio" name="typ" id="typ-privat" value="Privatperson" checked><span>Privatperson</span></label>
+      <label class="chip"><input type="radio" name="typ" id="typ-firma" value="Firma / Hausverwaltung / Bauträger"><span>Firma, Hausverwaltung, Bauträger</span></label>
+    </div>
+    <div class="grid">
+      <label class="f c6" id="firmaWrap" hidden>Firma<input type="text" id="firma" name="firma" autocomplete="organization"></label>
+      <label class="f c2">Anrede<select id="anrede" name="anrede"><option value="">bitte wählen</option><option>Frau</option><option>Herr</option><option>Keine Angabe</option></select></label>
+      <label class="f c2">Vorname<input type="text" id="vorname" name="vorname" autocomplete="given-name"></label>
+      <label class="f c2"><span class="req">Nachname</span><input type="text" id="nachname" name="nachname" autocomplete="family-name" required></label>
+      <label class="f c6"><span class="req">Straße und Hausnummer</span><input type="text" id="strasse" name="strasse" autocomplete="street-address" required></label>
+      <label class="f c2 keep"><span class="req">PLZ</span><input type="text" id="plz" name="plz" inputmode="numeric" autocomplete="postal-code" maxlength="5" required></label>
+      <label class="f c4 keep"><span class="req">Ort</span><input type="text" id="ort" name="ort" autocomplete="address-level2" required></label>
+      <label class="f c3"><span class="req">Telefon</span><input type="tel" id="telefon" name="telefon" autocomplete="tel" required></label>
+      <label class="f c3"><span class="req">E-Mail</span><input type="email" id="email" name="email" autocomplete="email" required></label>
+    </div>
+  </fieldset>
+  <fieldset class="group">
+    <h3>Wann erreichen wir Sie am besten?</h3>
+    <div class="chips">
+      <label class="chip"><input type="checkbox" name="erreichbar" id="err-vm" value="vormittags"><span>vormittags</span></label>
+      <label class="chip"><input type="checkbox" name="erreichbar" id="err-nm" value="nachmittags"><span>nachmittags</span></label>
+      <label class="chip"><input type="checkbox" name="erreichbar" id="err-ab" value="ab 17 Uhr"><span>ab 17 Uhr</span></label>
+      <label class="chip"><input type="checkbox" name="erreichbar" id="err-wa" value="lieber per WhatsApp"><span>lieber per WhatsApp</span></label>
+    </div>
+  </fieldset>
+</section>
+
+<!-- Schritt 2 -->
+<section class="step" data-step="2" data-name="Objekt" hidden>
+  <h2>Um welches Gebäude geht es?</h2>
+  <fieldset class="group">
+    <h3 class="req">Liegt die Baustelle an Ihrer Anschrift?</h3>
+    <div class="chips" data-required="gleicheAdresse">
+      <label class="chip"><input type="radio" name="gleicheAdresse" id="ga-ja" value="ja" checked><span>Ja</span></label>
+      <label class="chip"><input type="radio" name="gleicheAdresse" id="ga-nein" value="nein"><span>Nein, andere Adresse</span></label>
+    </div>
+    <div class="grid" id="objAdresse" hidden>
+      <label class="f c6"><span class="req">Straße und Hausnummer der Baustelle</span><input type="text" id="objStrasse" name="objStrasse"></label>
+      <label class="f c2 keep"><span class="req">PLZ</span><input type="text" id="objPlz" name="objPlz" inputmode="numeric" maxlength="5"></label>
+      <label class="f c4 keep"><span class="req">Ort</span><input type="text" id="objOrt" name="objOrt"></label>
+    </div>
+  </fieldset>
+  <fieldset class="group">
+    <h3>Gebäudeart</h3>
+    <div class="chips">
+      <label class="chip"><input type="radio" name="gebaeude" id="gb-efh" value="Einfamilienhaus"><span>Einfamilienhaus</span></label>
+      <label class="chip"><input type="radio" name="gebaeude" id="gb-dhh" value="Doppelhaus / Reihenhaus"><span>Doppel- / Reihenhaus</span></label>
+      <label class="chip"><input type="radio" name="gebaeude" id="gb-mfh" value="Mehrfamilienhaus"><span>Mehrfamilienhaus</span></label>
+      <label class="chip"><input type="radio" name="gebaeude" id="gb-gar" value="Garage / Carport"><span>Garage, Carport</span></label>
+      <label class="chip"><input type="radio" name="gebaeude" id="gb-bal" value="Balkon / Terrasse / Anbau"><span>Balkon, Terrasse, Anbau</span></label>
+      <label class="chip"><input type="radio" name="gebaeude" id="gb-gew" value="Gewerbe / Halle"><span>Gewerbe, Halle</span></label>
+    </div>
+    <div class="grid">
+      <label class="f c2">Baujahr ca.<input type="text" id="baujahr" name="baujahr" inputmode="numeric" maxlength="4" placeholder="z. B. 1974"></label>
+      <label class="f c2">Geschosse<select id="geschosse" name="geschosse"><option value="">bitte wählen</option><option>1</option><option>2</option><option>3</option><option>4 oder mehr</option></select></label>
+      <label class="f c2">Sie sind<select id="rolle" name="rolle"><option value="">bitte wählen</option><option>Eigentümer</option><option>Mieter</option><option>Verwalter</option></select></label>
+    </div>
+  </fieldset>
+  <fieldset class="group">
+    <h3>Zugang zum Dach</h3>
+    <div class="grid">
+      <label class="f c2">Zufahrt für Hubsteiger oder LKW<select id="zufahrt" name="zufahrt"><option value="">weiß nicht</option><option>Ja, direkt am Haus</option><option>Nur von der Straße</option><option>Nein, eng oder Hanglage</option></select></label>
+      <label class="f c2">Gerüst vorhanden<select id="geruest" name="geruest"><option value="">weiß nicht</option><option>Nein</option><option>Ja, einseitig</option><option>Ja, beidseitig</option><option>Ja, rundum</option></select></label>
+      <label class="f c2">Dachfenster oder Ausstieg<select id="ausstieg" name="ausstieg"><option value="">weiß nicht</option><option>Nein</option><option>Ja, einseitig</option><option>Ja, beidseitig</option></select></label>
+    </div>
+  </fieldset>
+</section>
+
+<!-- Schritt 3 -->
+<section class="step" data-step="3" data-name="Vorhaben" hidden>
+  <h2>Was soll gemacht werden?</h2>
+  <fieldset class="group">
+    <h3 class="req">Arbeiten <span class="hint">(mehrere möglich)</span></h3>
+    <div class="chips" data-required="leistung" id="leistungChips">
+      <label class="chip"><input type="checkbox" name="leistung" id="l1" value="Steildach neu eindecken"><span>Steildach neu eindecken</span></label>
+      <label class="chip"><input type="checkbox" name="leistung" id="l2" value="Flachdach sanieren / abdichten"><span>Flachdach sanieren, abdichten</span></label>
+      <label class="chip"><input type="checkbox" name="leistung" id="l3" value="Balkon / Terrasse abdichten"><span>Balkon, Terrasse abdichten</span></label>
+      <label class="chip"><input type="checkbox" name="leistung" id="l4" value="Reparatur / undichte Stelle"><span>Reparatur, undichte Stelle</span></label>
+      <label class="chip"><input type="checkbox" name="leistung" id="l5" value="Sturmschaden"><span>Sturmschaden</span></label>
+      <label class="chip"><input type="checkbox" name="leistung" id="l6" value="Dachrinne / Fallrohr"><span>Dachrinne, Fallrohr</span></label>
+      <label class="chip"><input type="checkbox" name="leistung" id="l7" value="Dachfenster / Ausstieg"><span>Dachfenster, Ausstieg</span></label>
+      <label class="chip"><input type="checkbox" name="leistung" id="l12" value="Solarthermie"><span>Solarthermie</span></label>
+      <label class="chip"><input type="checkbox" name="leistung" id="l8" value="Kaminverkleidung"><span>Kaminverkleidung</span></label>
+      <label class="chip"><input type="checkbox" name="leistung" id="l9" value="Wellplatten / Asbest entfernen"><span>Wellplatten, Asbest entfernen</span></label>
+      <label class="chip"><input type="checkbox" name="leistung" id="l10" value="Trapezblech"><span>Trapezblech</span></label>
+      <label class="chip"><input type="checkbox" name="leistung" id="l11" value="Sonstiges"><span>Sonstiges</span></label>
+    </div>
+  </fieldset>
+  <fieldset class="group">
+    <h3 class="req">Wie dringend ist es?</h3>
+    <div class="cards" data-required="dringlichkeit">
+      <label class="card"><input type="radio" name="dringlichkeit" id="d1" value="Akut – es regnet rein"><span class="body"><strong>Akut</strong><small>Es regnet rein oder es fehlen Teile</small></span></label>
+      <label class="card"><input type="radio" name="dringlichkeit" id="d2" value="Zeitnah – in den nächsten Wochen"><span class="body"><strong>Zeitnah</strong><small>In den nächsten Wochen</small></span></label>
+      <label class="card"><input type="radio" name="dringlichkeit" id="d3" value="Planbar – Termin flexibel"><span class="body"><strong>Planbar</strong><small>Termin ist flexibel</small></span></label>
+      <label class="card"><input type="radio" name="dringlichkeit" id="d4" value="Erst einmal Kostenrahmen"><span class="body"><strong>Kostenrahmen</strong><small>Erst einmal grob wissen, was es kostet</small></span></label>
+    </div>
+    <div class="notice" id="akutHinweis" hidden>Bei Wasser im Haus rufen Sie bitte zusätzlich direkt an: <strong>0173 4024949</strong></div>
+    <label class="f">Wunschzeitraum<input type="text" id="zeitraum" name="zeitraum" placeholder="z. B. Frühjahr 2027 oder vor dem Winter"></label>
+  </fieldset>
+  <fieldset class="group">
+    <label class="f"><span class="req">Beschreiben Sie kurz Ihr Vorhaben</span>
+      <span class="hint">Was ist kaputt oder was soll erneuert werden? Wo genau tritt Wasser ein?</span>
+      <textarea id="beschreibung" name="beschreibung" required placeholder="z. B. Garagendach ca. 6 x 3 m, alte Bitumenbahn ist rissig, bei Starkregen tropft es an der Rückwand."></textarea>
+    </label>
+  </fieldset>
+</section>
+
+<!-- Schritt 4 -->
+<section class="step" data-step="4" data-name="Dach & Maße" hidden>
+  <h2 id="s4title">Dachform und Maße</h2>
+  <p class="lead" id="s4lead">Schätzwerte reichen. Wir messen beim Termin vor Ort genau nach.</p>
+  <fieldset class="group">
+    <h3 id="eindeckungTitel">Womit ist das Dach gedeckt?</h3>
+    <div class="chips" id="eindeckungChips">
+      <label class="chip"><input type="radio" name="eindeckung" id="ed1" value="Schiefer"><span>Schiefer</span></label>
+      <label class="chip"><input type="radio" name="eindeckung" id="ed2" value="Betondachsteine"><span>Betondachsteine</span></label>
+      <label class="chip"><input type="radio" name="eindeckung" id="ed3" value="Ziegel"><span>Ziegel</span></label>
+      <label class="chip"><input type="radio" name="eindeckung" id="ed4" value="Blechdach"><span>Blechdach</span></label>
+      <label class="chip"><input type="radio" name="eindeckung" id="ed5" value="Flachdach"><span>Flachdach</span></label>
+      <label class="chip"><input type="radio" name="eindeckung" id="ed6" value="Bitumenschindeln"><span>Bitumenschindeln</span></label>
+      <label class="chip"><input type="radio" name="eindeckung" id="ed7" value="Wellplatten (evtl. Asbest)"><span>Wellplatten</span></label>
+      <label class="chip"><input type="radio" name="eindeckung" id="ed8" value="weiß nicht"><span>weiß nicht</span></label>
+    </div>
+  </fieldset>
+  <fieldset class="group" id="gFenster" hidden>
+    <h3>Dachfenster</h3>
+    <div class="grid">
+      <label class="f c4"><span class="req">Was ist geplant?</span><select id="fensterArt" name="fensterArt"><option value="">bitte wählen</option><option>Altes Fenster austauschen</option><option>Neues Fenster zusätzlich einbauen</option><option>Fenster undicht / Reparatur</option><option>Rollladen oder Hitzeschutz nachrüsten</option></select></label>
+      <label class="f c2"><span class="req">Anzahl</span><span class="unit"><input type="number" id="fensterAnzahl" name="fensterAnzahl" min="1" step="1" inputmode="numeric"><em>Stk</em></span></label>
+    </div>
+    <div class="f" style="font-weight:600">Foto vom Typenschild <span class="hint">Das Schild sitzt oben im Rahmen, wenn das Fenster ganz geöffnet ist. Darauf stehen Hersteller, Typ und Größe, z. B. „GGL MK06“.</span></div>
+    <div class="drop" id="dropTyp" tabindex="0" role="button" aria-label="Foto vom Typenschild auswählen">
+      <strong>Typenschild fotografieren</strong>
+      <span class="hint">Je Fenster ein Foto, möglichst scharf und ohne Blitz-Spiegelung</span>
+      <input type="file" id="filesTyp" accept="image/*" multiple hidden>
+    </div>
+    <div class="thumbs" id="thumbsTyp"></div>
+    <label class="f">Kein Typenschild zu finden? Dann bitte das Rahmenmaß innen <span class="hint">Breite x Höhe in cm, z. B. 78 x 118</span><input type="text" id="fensterMass" name="fensterMass" placeholder="Breite x Höhe in cm"></label>
+    <span class="hint">Fotos vom Fenster innen und außen bitte im nächsten Schritt hochladen.</span>
+  </fieldset>
+  <fieldset class="group" id="gDachform">
+    <h3>Dachform</h3>
+    <div class="cards roofs">
+      <label class="card"><input type="radio" name="dachform" id="df1" value="Satteldach"><span class="body"><svg viewBox="0 0 64 40"><path class="fill" d="M6 22 32 4 58 22Z"/><path d="M6 22 32 4 58 22"/><rect x="12" y="22" width="40" height="16"/></svg>Satteldach</span></label>
+      <label class="card"><input type="radio" name="dachform" id="df2" value="Pultdach"><span class="body"><svg viewBox="0 0 64 40"><path class="fill" d="M8 20 56 6 56 20Z"/><path d="M8 20 56 6"/><rect x="12" y="20" width="40" height="18"/></svg>Pultdach</span></label>
+      <label class="card"><input type="radio" name="dachform" id="df3" value="Walmdach"><span class="body"><svg viewBox="0 0 64 40"><path class="fill" d="M6 22 22 6 42 6 58 22Z"/><path d="M6 22 22 6 42 6 58 22"/><rect x="12" y="22" width="40" height="16"/></svg>Walmdach</span></label>
+      <label class="card"><input type="radio" name="dachform" id="df4" value="Flachdach"><span class="body"><svg viewBox="0 0 64 40"><path class="fill" d="M8 14H56V19H8Z"/><path d="M8 14H56V19H8Z"/><rect x="12" y="19" width="40" height="19"/></svg>Flachdach</span></label>
+      <label class="card"><input type="radio" name="dachform" id="df5" value="Mansarddach"><span class="body"><svg viewBox="0 0 64 40"><path class="fill" d="M8 24 14 10 24 3 40 3 50 10 56 24Z"/><path d="M8 24 14 10 24 3 40 3 50 10 56 24"/><rect x="12" y="24" width="40" height="14"/></svg>Mansarddach</span></label>
+      <label class="card"><input type="radio" name="dachform" id="df6" value="Weiß nicht / gemischt"><span class="body"><svg viewBox="0 0 64 40"><path d="M14 24 26 10 36 18 44 8 54 24"/><rect x="12" y="24" width="40" height="14"/></svg>Weiß nicht</span></label>
+    </div>
+  </fieldset>
+  <fieldset class="group" id="gFlaechen">
+    <h3>Grundfläche und Dachneigung</h3>
+    <div class="notice">Bitte die <strong>Grundfläche des Gebäudes</strong> angeben, also Länge und Breite von außen am Boden gemessen oder aus dem Grundriss. <strong>Nicht die Dachschräge.</strong> Die Dachfläche rechnen wir mit der Dachneigung aus.</div>
+    <span class="hint"><strong>Das ganze Gebäude in eine Zeile, nicht jede Dachseite einzeln.</strong> Beim Satteldach rechnen wir beide Dachseiten automatisch. Eine weitere Zeile nur für ein anderes Gebäude oder einen Anbau, z. B. Garage. Länge = Traufseite, Breite = Giebelseite. Neigung unbekannt? Leer lassen, wir messen vor Ort. Steildächer haben meist 30 bis 45 Grad.</span>
+    <div class="bauteile" id="rows"></div>
+    <div class="total">
+      <span>Summe</span>
+      <span>Grundfläche <b id="sumg">0,00 m²</b></span>
+      <span>Dachfläche ca. <b class="acc" id="sumd">–</b></span>
+    </div>
+    <span class="hint" id="sumHint" hidden></span>
+    <button type="button" class="btn link" id="addRow">+ Weiteres Gebäude, z. B. Garage</button>
+    <label class="f">Dachüberstand ca. <span class="hint">Wie weit das Dach über die Hauswand ragt, falls bekannt. Wird in der Dachfläche mitgerechnet.</span><span class="unit" style="max-width:220px"><input type="number" id="ueberstand" name="ueberstand" min="0" max="150" step="5" inputmode="numeric" placeholder="z. B. 40"><em>cm</em></span></label>
+    <label class="f">Woher stammen die Maße?<select id="massQuelle" name="massQuelle"><option value="">bitte wählen</option><option>Aus dem Bauplan</option><option>Selbst gemessen</option><option>Geschätzt</option></select></label>
+  </fieldset>
+  <fieldset class="group" id="gLaengen">
+    <h3>Längen und Stückzahlen <span class="hint">(falls bekannt)</span></h3>
+    <div class="grid">
+      <label class="f c2">Dachrinne gesamt<span class="unit"><input type="number" id="rinne" name="rinne" min="0" step="0.5" inputmode="decimal"><em>lfm</em></span></label>
+      <label class="f c2">Fallrohre<span class="unit"><input type="number" id="fallrohre" name="fallrohre" min="0" step="1" inputmode="numeric"><em>Stk</em></span></label>
+      <label class="f c2">Kamine<span class="unit"><input type="number" id="kamine" name="kamine" min="0" step="1" inputmode="numeric"><em>Stk</em></span></label>
+      <span class="hint c6">Die Rinnenlänge wird aus den Gebäudemaßen berechnet: Satteldach beide Traufseiten, Pultdach eine, Walmdach rundum. Bei Flachdach oder wenn es anders ist, bitte selbst eintragen.</span>
+    </div>
+  </fieldset>
+</section>
+
+<!-- Schritt 5 -->
+<section class="step" data-step="5" data-name="Fotos & Absenden" hidden>
+  <h2>Fotos und Unterlagen</h2>
+  <p class="lead">Fotos helfen uns am meisten. Handyfotos reichen völlig.</p>
+  <fieldset class="group">
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Fotos oder Pläne auswählen">
+      <strong>Fotos hinzufügen</strong>
+      <span class="hint">Tippen zum Auswählen oder Dateien hierher ziehen · Bilder und PDF · bis 20 Dateien</span>
+      <input type="file" id="files" accept="image/*,application/pdf" multiple hidden>
+    </div>
+    <div class="thumbs" id="thumbs"></div>
+    <div>
+      <strong style="font-size:.95rem">Besonders hilfreich sind</strong>
+      <ul class="tips">
+        <li>Gesamtansicht des Daches von Straße oder Garten</li>
+        <li>Die Schadstelle aus der Nähe</li>
+        <li>Anschlüsse an Wand, Kamin, Fenster oder Tür</li>
+        <li>Bei Feuchte: der Fleck innen bzw. der Dachboden</li>
+        <li>Bauplan oder Schnitt, falls vorhanden</li>
+      </ul>
+    </div>
+  </fieldset>
+  <fieldset class="group">
+    <div class="grid">
+      <label class="f c6">Wie sind Sie auf uns aufmerksam geworden?<select id="quelle" name="quelle"><option value="">bitte wählen</option><option>Empfehlung</option><option>Google</option><option>Baustellenschild / Fahrzeug</option><option>Bin schon Kunde</option><option>Sonstiges</option></select></label>
+      <label class="f c6">Noch etwas, das wir wissen sollten?<textarea id="anmerkung" name="anmerkung" style="min-height:80px"></textarea></label>
+    </div>
+    <label class="check"><input type="checkbox" id="datenschutz" name="datenschutz" required><span>Ich habe die <a href="/datenschutz" target="_blank" rel="noopener" style="color:var(--orange)">Datenschutzhinweise</a> gelesen. Meine Angaben und Fotos werden nur zur Bearbeitung dieser Anfrage verwendet. *</span></label>
+    <span class="hint">Bitte laden Sie nur Fotos vom Gebäude hoch und achten Sie darauf, dass keine Personen oder Autokennzeichen erkennbar sind.</span>
+  </fieldset>
+</section>
+<div class="hp" aria-hidden="true"><label for="website">Bitte leer lassen</label><input type="text" id="website" tabindex="-1" autocomplete="off"></div>
+
+<div class="errmsg" id="formErr" role="alert" hidden></div>
+<div class="nav" id="nav">
+  <button type="button" class="btn" id="back" hidden>Zurück</button>
+  <button type="button" class="btn primary" id="next">Weiter</button>
+</div>
+</form>
+
+<section class="done" id="done" hidden>
+  <h2>Danke, Ihre Anfrage ist da.</h2>
+  <p>Wir melden uns innerhalb von zwei Werktagen, bei akuten Schäden schneller.</p>
+  <div class="notice" id="testNotice" hidden>Vorschau-Modus: Es wurde nichts verschickt. So kommt die Anfrage später bei dir an:</div>
+  <pre class="summary" id="summary" hidden></pre>
+  <button type="button" class="btn" id="restart">Neue Anfrage</button>
+</section>
+</div>
+</main>
+
+<footer class="band">
+  <div class="wrap">
+    <span>Dachdeckermeisterbetrieb König</span>
+    <span>In Bisholder 34, 56072 Koblenz</span>
+    <span>0173 4024949</span>
+    <span>info@dachdeckermeister-koenig.de</span>
+    <a href="/impressum">Impressum</a>
+    <a href="/datenschutz">Datenschutz</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // Leer = Vorschau (nichts wird gesendet). Auf der echten Seite: '/api'
+  var ENDPOINT = '/api';
+  var startedAt = Date.now();
+  var MAX_FILES = 20, MAX_EDGE = 2000, JPEG_Q = 0.82, MAX_PDF = 10*1024*1024;
+  var DRAFT_KEY = 'koenig-anfrage-entwurf';
+
+  var form = document.getElementById('f');
+  var steps = Array.prototype.slice.call(form.querySelectorAll('.step'));
+  var bars = document.querySelectorAll('.progress i');
+  var cur = 0;
+  var files = []; // {name, blob, url, kind}
+
+  function $(id){return document.getElementById(id)}
+  function show(i){
+    steps.forEach(function(s,k){s.hidden = k!==i});
+    bars.forEach(function(b,k){b.classList.toggle('on',k<=i)});
+    $('steplabel').textContent = 'Schritt '+(i+1)+' von '+steps.length+' · '+steps[i].dataset.name;
+    $('back').hidden = i===0;
+    $('next').textContent = i===steps.length-1 ? 'Anfrage absenden' : 'Weiter';
+    $('formErr').hidden = true;
+    cur = i;
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  // Abhängige Felder
+  function toggles(){
+    var firma = form.typ.value !== 'Privatperson';
+    $('firmaWrap').hidden = !firma;
+    var andere = form.gleicheAdresse.value === 'nein';
+    $('objAdresse').hidden = !andere;
+    ['objStrasse','objPlz','objOrt'].forEach(function(id){$(id).required = andere});
+    $('akutHinweis').hidden = !$('d1').checked;
+    // Dachfenster: Dachform und Maße spielen keine Rolle, nur Typenschild, Fotos und Eindeckung
+    var gewaehlt = form.querySelectorAll('[name="leistung"]:checked');
+    var fenster = $('l7').checked, nurFenster = fenster && gewaehlt.length===1;
+    $('gFenster').hidden = !fenster;
+    $('fensterArt').required = fenster; $('fensterAnzahl').required = fenster;
+    ['gDachform','gFlaechen','gLaengen'].forEach(function(id){ $(id).hidden = nurFenster });
+    $('eindeckungTitel').className = fenster ? 'req' : '';
+    if(fenster) $('eindeckungChips').dataset.required = 'eindeckung'; else delete $('eindeckungChips').dataset.required;
+    steps[3].dataset.name = nurFenster ? 'Dachfenster' : 'Dach & Maße';
+    $('s4title').textContent = nurFenster ? 'Dachfenster' : 'Dachform und Maße';
+    $('s4lead').textContent = nurFenster ? 'Für Dachfenster brauchen wir keine Dachmaße, nur Eindeckung, Typenschild und Fotos.' : 'Schätzwerte reichen. Wir messen beim Termin vor Ort genau nach.';
+  }
+  form.addEventListener('change', function(){toggles(); saveDraft()});
+  form.addEventListener('input', saveDraft);
+
+  // Validierung
+  function validate(i){
+    var s = steps[i], ok = true, first = null;
+    s.querySelectorAll('.invalid').forEach(function(el){el.classList.remove('invalid')});
+    s.querySelectorAll('.chips.err,.cards.err').forEach(function(el){el.classList.remove('err')});
+    s.querySelectorAll('input[required],textarea[required],select[required]').forEach(function(el){
+      if(el.closest('[hidden]')) return;
+      var bad = el.type==='checkbox' ? !el.checked : !el.value.trim();
+      if(!bad && el.type==='email') bad = !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(el.value.trim());
+      if(!bad && (el.id==='plz'||el.id==='objPlz')) bad = !/^\d{5}$/.test(el.value.trim());
+      if(bad){ok=false; el.classList.add('invalid'); first = first||el}
+    });
+    s.querySelectorAll('[data-required]').forEach(function(box){
+      var name = box.dataset.required;
+      if(box.closest('[hidden]')) return;
+      if(!form.querySelector('[name="'+name+'"]:checked')){ok=false; box.classList.add('err'); first = first||box.querySelector('input')}
+    });
+    if(!ok){
+      $('formErr').textContent = 'Bitte die markierten Pflichtfelder ausfüllen.';
+      $('formErr').hidden = false;
+      if(first) first.focus({preventScroll:false});
+    }
+    return ok;
+  }
+
+  $('next').addEventListener('click', function(){
+    if(!validate(cur)) return;
+    if(cur < steps.length-1) show(cur+1); else submit();
+  });
+  $('back').addEventListener('click', function(){ if(cur>0) show(cur-1) });
+  form.addEventListener('submit', function(e){e.preventDefault()});
+
+  // Maßtabelle
+  var rowsEl = $('rows'), rowN = 0;
+  function num(v){ v = String(v||'').replace(',','.'); var n = parseFloat(v); return isFinite(n)?n:0 }
+  function fmt(n){ return n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) }
+  var FORMS = ['Satteldach','Pultdach','Walmdach','Flachdach','Mansarddach','Weiß nicht'];
+  var SLOPED = {Satteldach:1, Pultdach:1, Walmdach:1};
+  function cardForm(){
+    var c = form.querySelector('[name="dachform"]:checked');
+    if(!c) return '';
+    return c.value.indexOf('Weiß nicht')===0 ? 'Weiß nicht' : c.value;
+  }
+  function addRow(d){
+    d = d||{}; rowN++;
+    var first = !rowsEl.children.length;
+    var opts = '<option value="">bitte wählen</option>'+FORMS.map(function(f){return '<option>'+f+'</option>'}).join('');
+    var tr = document.createElement('div'); tr.className = 'bauteil';
+    var n = rowN;
+    tr.innerHTML = '<div class="grid">'+
+      '<label class="f c3">Gebäude<input type="text" id="mb'+n+'" placeholder="'+(first?'z. B. Wohnhaus':'z. B. Garage')+'"></label>'+
+      '<label class="f c3">Dachform<select id="mf'+n+'">'+opts+'</select></label>'+
+      '<label class="f c2 keep">Länge<span class="unit"><input type="text" inputmode="decimal" id="ml'+n+'" placeholder="0,00"><em>m</em></span></label>'+
+      '<label class="f c2 keep">Breite<span class="unit"><input type="text" inputmode="decimal" id="mw'+n+'" placeholder="0,00"><em>m</em></span></label>'+
+      '<label class="f c2 keep">Neigung<span class="unit"><input type="text" inputmode="decimal" id="mn'+n+'" placeholder="z. B. 35"><em>Grad</em></span></label>'+
+      '</div>'+
+      '<div class="result"><span>Grundfläche <b class="rg">0,00 m²</b></span><span>Dachfläche ca. <b class="rd acc">–</b></span><span>Rinne ca. <b class="rr">–</b></span>'+
+      '<button type="button" class="iconbtn" aria-label="Gebäude entfernen">×</button></div>';
+    var ins = tr.querySelectorAll('input'), sel = tr.querySelector('select');
+    ins[0].value = d.b||''; ins[1].value = d.l||''; ins[2].value = d.w||''; ins[3].value = d.n||'';
+    sel.value = d.f || (first ? cardForm() : '');
+    tr.addEventListener('input', calc); sel.addEventListener('change', calc);
+    tr.querySelector('button').addEventListener('click', function(){ tr.remove(); if(!rowsEl.children.length) addRow(); calc(); saveDraft() });
+    rowsEl.appendChild(tr); calc();
+  }
+  function rows(){
+    return Array.prototype.map.call(rowsEl.children, function(tr){
+      var i = tr.querySelectorAll('input');
+      return {b:i[0].value.trim(), f:tr.querySelector('select').value, l:i[1].value.trim(), w:i[2].value.trim(), n:i[3].value.trim()};
+    });
+  }
+  // Grundfläche L x B. Dachfläche = (L + 2 Überstand) x (B + 2 Überstand) / cos(Neigung).
+  // Satteldach: 2 x L x (B/2) / cos(DN) ergibt dasselbe. Walmdach bei gleicher Neigung ebenso.
+  function rowCalc(r){
+    var L = num(r.l), B = num(r.w), n = num(r.n), u = num($('ueberstand').value)/100;
+    var g = L*B, res = {g:g, d:null, r:null, why:''};
+    if(!g){ res.why = ''; return res }
+    var proj = (L+2*u)*(B+2*u);
+    // Rinne an der Traufe inkl. Überstand am Ortgang: Satteldach 2 Seiten, Pultdach 1, Walmdach rundum, Mansarddach 2
+    var RIN = {Satteldach:2*(L+2*u), Pultdach:L+2*u, Walmdach:2*((L+2*u)+(B+2*u)), Mansarddach:2*(L+2*u)};
+    if(RIN[r.f]!==undefined) res.r = RIN[r.f];
+    if(r.f==='Flachdach'){ res.d = proj; return res }
+    if(SLOPED[r.f]){
+      if(!r.n || n<=0 || n>=80){ res.why = 'Neigung fehlt'; return res }
+      res.d = proj/Math.cos(n*Math.PI/180); return res;
+    }
+    res.why = r.f ? 'vor Ort' : 'Dachform fehlt';
+    return res;
+  }
+  function calc(){
+    var sg = 0, sd = 0, sr = 0, open = 0, any = 0;
+    Array.prototype.forEach.call(rowsEl.children, function(tr, k){
+      var c = rowCalc(rows()[k]);
+      tr.querySelector('.rg').textContent = fmt(c.g)+' m²';
+      var dc = tr.querySelector('.rd');
+      dc.classList.toggle('why', !!c.why);
+      if(c.d!==null){ dc.textContent = fmt(c.d)+' m²'; sd += c.d; any++ }
+      else if(c.why){ dc.textContent = c.why==='vor Ort' ? 'messen wir vor Ort' : c.why; open++ }
+      else dc.textContent = '–';
+      tr.querySelector('.rr').textContent = c.r!==null ? fmt(c.r)+' m' : (rows()[k].f==='Flachdach' ? 'bitte unten eintragen' : '–');
+      if(c.r!==null) sr += c.r;
+      sg += c.g;
+    });
+    $('sumg').textContent = fmt(sg)+' m²';
+    $('sumd').textContent = any ? fmt(sd)+' m²' : '–';
+    if(!rinneManual) $('rinne').value = sr ? (Math.round(sr*10)/10).toFixed(1) : '';
+    $('sumHint').hidden = !open;
+    $('sumHint').textContent = open ? 'Summe Dachfläche ohne '+open+(open===1?' Gebäudeteil':' Gebäudeteile')+', bei denen Neigung oder Dachform fehlt. Das ermitteln wir vor Ort.' : '';
+    return {g:sg, d:sd, open:open};
+  }
+  $('ueberstand').addEventListener('input', calc);
+  var rinneManual = false;
+  $('rinne').addEventListener('input', function(){ rinneManual = $('rinne').value !== ''; if(!rinneManual) calc() });
+  form.querySelectorAll('[name="dachform"]').forEach(function(r){
+    r.addEventListener('change', function(){
+      var s = rowsEl.firstChild && rowsEl.firstChild.querySelector('select');
+      if(s && !s.value){ s.value = cardForm(); calc() }
+    });
+  });
+  $('addRow').addEventListener('click', function(){ addRow(); rowsEl.lastChild.querySelector('input').focus() });
+
+  // Fotos
+  function zone(dropId, inputId, tag){
+    var drop = $(dropId), input = $(inputId);
+    drop.addEventListener('click', function(){ input.click() });
+    drop.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){e.preventDefault(); input.click()} });
+    ['dragenter','dragover'].forEach(function(t){drop.addEventListener(t,function(e){e.preventDefault();drop.classList.add('over')})});
+    ['dragleave','drop'].forEach(function(t){drop.addEventListener(t,function(e){e.preventDefault();drop.classList.remove('over')})});
+    drop.addEventListener('drop', function(e){ addFiles(e.dataTransfer.files, tag) });
+    input.addEventListener('change', function(){ addFiles(input.files, tag); input.value='' });
+  }
+  zone('drop','files','');
+  zone('dropTyp','filesTyp','Typenschild');
+
+  function shrink(file){
+    return new Promise(function(res){
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function(){
+        var s = Math.min(1, MAX_EDGE/Math.max(img.width,img.height));
+        var c = document.createElement('canvas');
+        c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function(b){ res(b && b.size < file.size ? b : file) }, 'image/jpeg', JPEG_Q);
+      };
+      img.onerror = function(){ URL.revokeObjectURL(url); res(file) };
+      img.src = url;
+    });
+  }
+  function addFiles(list, tag){
+    var arr = Array.prototype.slice.call(list||[]);
+    var msg = '';
+    arr.forEach(function(f){
+      if(files.length >= MAX_FILES){ msg = 'Maximal '+MAX_FILES+' Dateien.'; return }
+      if(f.type === 'application/pdf'){
+        if(f.size > MAX_PDF){ msg = f.name+' ist größer als 10 MB.'; return }
+        files.push({name:f.name, blob:f, kind:'pdf', tag:tag}); render(); return;
+      }
+      if(!/^image\//.test(f.type)){ msg = f.name+' ist kein Bild und kein PDF.'; return }
+      var base = f.name.replace(/\.(heic|heif|png|webp)$/i,'.jpg');
+      var entry = {name:(tag ? tag+'_' : '')+base, blob:null, kind:'img', tag:tag};
+      files.push(entry); render();
+      shrink(f).then(function(b){ entry.blob = b; entry.url = URL.createObjectURL(b); render() });
+    });
+    if(msg){ $('formErr').textContent = msg; $('formErr').hidden = false }
+  }
+  function kb(n){ return n>1048576 ? (n/1048576).toLocaleString('de-DE',{maximumFractionDigits:1})+' MB' : Math.round(n/1024)+' KB' }
+  function render(){
+    $('thumbs').innerHTML = ''; $('thumbsTyp').innerHTML = '';
+    files.forEach(function(f, i){
+      var thumbs = f.tag==='Typenschild' ? $('thumbsTyp') : $('thumbs');
+      var d = document.createElement('div'); d.className = 'thumb';
+      if(f.kind==='img' && f.url){ var im = document.createElement('img'); im.src = f.url; im.alt = f.name; d.appendChild(im) }
+      else { var doc = document.createElement('div'); doc.className='doc'; var b=document.createElement('b'); b.textContent = f.kind==='pdf'?'PDF':'…'; var t=document.createElement('span'); t.textContent=f.name; doc.appendChild(b); doc.appendChild(t); d.appendChild(doc) }
+      if(f.blob){ var sz = document.createElement('span'); sz.className='size'; sz.textContent = kb(f.blob.size); d.appendChild(sz) }
+      var x = document.createElement('button'); x.type='button'; x.textContent='×'; x.setAttribute('aria-label', f.name+' entfernen');
+      x.addEventListener('click', function(){ if(f.url) URL.revokeObjectURL(f.url); files.splice(i,1); render() });
+      d.appendChild(x); thumbs.appendChild(d);
+    });
+  }
+
+  // Daten sammeln
+  function collect(){
+    var fd = new FormData(form), o = {};
+    fd.forEach(function(v,k){ if(v instanceof File) return; if(o[k]!==undefined){ o[k] = [].concat(o[k], v) } else o[k] = v });
+    o.flaechen = rows().filter(function(r){return r.b||r.l||r.w}).map(function(r){
+      var c = rowCalc(r);
+      r.grundflaeche_m2 = Math.round(c.g*100)/100;
+      r.dachflaeche_m2 = c.d===null ? null : Math.round(c.d*100)/100;
+      r.rinne_m = c.r===null ? null : Math.round(c.r*100)/100;
+      r.hinweis = c.why; return r;
+    });
+    if($('gFlaechen').hidden) o.flaechen = [];
+    var s = calc();
+    o.grundflaecheSumme_m2 = Math.round(s.g*100)/100;
+    o.dachflaecheSumme_m2 = Math.round(s.d*100)/100;
+    o.dachflaecheOffen = s.open;
+    o.datenschutz = $('datenschutz').checked;
+    o.gesendet = new Date().toISOString();
+    return o;
+  }
+  function summaryText(o){
+    var L = [];
+    function line(k,v){ if(v!==undefined && v!=='' && !(Array.isArray(v)&&!v.length)) L.push(k+': '+(Array.isArray(v)?v.join(', '):v)) }
+    L.push('NEUE DACHANFRAGE');
+    line('Anfrage als', o.typ); line('Firma', o.firma);
+    line('Name', [o.anrede,o.vorname,o.nachname].filter(Boolean).join(' '));
+    line('Anschrift', o.strasse+', '+o.plz+' '+o.ort);
+    line('Telefon', o.telefon); line('E-Mail', o.email); line('Erreichbar', o.erreichbar);
+    L.push('');
+    line('Baustelle', o.gleicheAdresse==='nein' ? o.objStrasse+', '+o.objPlz+' '+o.objOrt : 'wie Anschrift');
+    line('Gebäude', o.gebaeude); line('Baujahr', o.baujahr); line('Geschosse', o.geschosse); line('Rolle', o.rolle);
+    line('Zufahrt', o.zufahrt); line('Gerüst', o.geruest); line('Dachfenster/Ausstieg', o.ausstieg);
+    L.push('');
+    line('Arbeiten', o.leistung); line('Dringlichkeit', o.dringlichkeit); line('Wunschzeitraum', o.zeitraum);
+    line('Beschreibung', o.beschreibung);
+    L.push('');
+    line('Eindeckung', o.eindeckung);
+    if($('l7').checked){
+      line('Dachfenster', (o.fensterAnzahl||'?')+' Stk · '+(o.fensterArt||''));
+      var typ = files.filter(function(f){return f.tag==='Typenschild'}).length;
+      line('Typenschild-Fotos', typ ? typ+' Stk' : 'keine');
+      line('Rahmenmaß innen', o.fensterMass);
+    }
+    if(!$('gDachform').hidden) line('Dachform', o.dachform);
+    if(o.flaechen.length) L.push('Gebäudeteile (Grundfläche, Dachfläche berechnet):');
+    o.flaechen.forEach(function(r){
+      L.push('  '+(r.b||'Gebäudeteil')+' · '+(r.f||'Dachform ?')+(r.n?' '+r.n+'°':'')+': Grundriss '+(r.l||'?')+' m x '+(r.w||'?')+' m = '+fmt(r.grundflaeche_m2)+' m²'+
+        ' · Dachfläche '+(r.dachflaeche_m2===null ? (r.hinweis||'offen') : 'ca. '+fmt(r.dachflaeche_m2)+' m²')+(r.rinne_m!==null ? ' · Rinne ca. '+fmt(r.rinne_m)+' m' : ''));
+    });
+    if(o.flaechen.length){
+      line('Summe Grundfläche', fmt(o.grundflaecheSumme_m2)+' m²');
+      line('Summe Dachfläche ca.', fmt(o.dachflaecheSumme_m2)+' m²'+(o.dachflaecheOffen ? ' (ohne '+o.dachflaecheOffen+' offene Teile)' : ''));
+    }
+    if(!$('gFlaechen').hidden) line('Dachüberstand', o.ueberstand ? o.ueberstand+' cm (in Dachfläche enthalten)' : 'nicht angegeben, nicht enthalten');
+    line('Maße aus', o.massQuelle);
+    line('Rinne gesamt', o.rinne ? o.rinne.replace('.',',')+' lfm'+(rinneManual ? ' (vom Kunden eingetragen)' : ' (berechnet)') : ''); line('Fallrohre', o.fallrohre ? o.fallrohre+' Stk':'');
+    line('Kamine', o.kamine ? o.kamine+' Stk':'');
+    L.push('');
+    line('Dateien', files.length ? files.length+' ('+files.map(function(f){return f.name}).join(', ')+')' : 'keine');
+    line('Aufmerksam durch', o.quelle); line('Anmerkung', o.anmerkung);
+    return L.join('\n');
+  }
+
+  function submit(){
+    var o = collect();
+    if(!ENDPOINT){
+      $('summary').textContent = summaryText(o);
+      $('summary').hidden = false; $('testNotice').hidden = false;
+      finish(); return;
+    }
+    var text = summaryText(o);
+    var btn = $('next'); btn.disabled = true; $('back').disabled = true;
+    var list = files.filter(function(f){ return f.blob });
+    var i = 0;
+    // 1. Dateien einzeln hochladen (bereits hochgeladene beim erneuten Versuch überspringen)
+    function upload(){
+      if(i >= list.length) return send();
+      var f = list[i];
+      if(f.id){ i++; return upload() }
+      btn.textContent = 'Fotos werden hochgeladen ('+(i+1)+' von '+list.length+') …';
+      return fetch(ENDPOINT+'/datei', {method:'POST', body:f.blob, headers:{'Content-Type': f.blob.type || (f.kind==='pdf' ? 'application/pdf' : 'image/jpeg'), 'X-Dateiname': encodeURIComponent(f.name)}})
+        .then(function(r){ if(!r.ok) throw new Error('Upload '+r.status); return r.json() })
+        .then(function(j){ f.id = j.id; i++; return upload() });
+    }
+    // 2. Anfrage mit Verweis auf die Dateien senden
+    function send(){
+      btn.textContent = 'Anfrage wird gesendet …';
+      var dateien = list.map(function(f){ return {id:f.id, name:f.name} });
+      return fetch(ENDPOINT+'/anfrage', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({daten:o, text:text, dateien:dateien, t:startedAt, website:$('website').value})})
+        .then(function(r){ if(!r.ok) throw new Error('Anfrage '+r.status); finish() });
+    }
+    upload().catch(function(){
+      $('formErr').textContent = 'Senden hat nicht geklappt. Bitte prüfen Sie die Internetverbindung und tippen Sie erneut auf „Anfrage absenden“, oder rufen Sie uns an: 0173 4024949.';
+      $('formErr').hidden = false;
+    }).finally(function(){ btn.disabled = false; $('back').disabled = false; btn.textContent = 'Anfrage absenden' });
+  }
+  function finish(){
+    form.hidden = true; $('done').hidden = false;
+    document.querySelector('.progress').hidden = true; $('steplabel').hidden = true;
+    try{ localStorage.removeItem(DRAFT_KEY) }catch(e){}
+    window.scrollTo({top:0});
+  }
+  $('restart').addEventListener('click', function(){
+    form.reset(); files = []; render(); rowsEl.innerHTML=''; addRow(); toggles();
+    form.hidden = false; $('done').hidden = true; $('summary').hidden = true; $('testNotice').hidden = true;
+    document.querySelector('.progress').hidden = false; $('steplabel').hidden = false; show(0);
+  });
+
+  // Entwurf im Browser merken (ohne Fotos)
+  var saveT;
+  function saveDraft(){
+    clearTimeout(saveT);
+    saveT = setTimeout(function(){
+      try{
+        var o = {}; Array.prototype.forEach.call(form.elements, function(el){
+          if(!el.id || el.type==='file') return;
+          o[el.id] = (el.type==='checkbox'||el.type==='radio') ? el.checked : el.value;
+        });
+        o.__rows = rows();
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(o));
+      }catch(e){}
+    }, 400);
+  }
+  function loadDraft(){
+    var o = null;
+    try{ o = JSON.parse(localStorage.getItem(DRAFT_KEY)||'null') }catch(e){}
+    if(o){
+      Object.keys(o).forEach(function(id){
+        var el = document.getElementById(id); if(!el || !el.form) return;
+        if(el.type==='checkbox'||el.type==='radio') el.checked = !!o[id]; else el.value = o[id];
+      });
+      (o.__rows&&o.__rows.length?o.__rows:[{}]).forEach(addRow);
+    } else addRow();
+  }
+
+  loadDraft(); toggles(); show(0);
+})();
+</script>
+
+</body>
+</html>
